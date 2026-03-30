@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCarrinho } from "../../context/CarrinhoContext";
 import {
   Container,
   Banner,
@@ -65,6 +66,7 @@ const mockProdutos = [
 export default function Cardapio() {
   const [produtos] = useState(mockProdutos);
   const [categorias] = useState(mockCategorias);
+  const { adicionarItem } = useCarrinho();
 
   return (
     <Container>
@@ -91,7 +93,9 @@ export default function Cardapio() {
                       R$ {parseFloat(produto.valorProduto).toFixed(2)}
                     </span>
                     <br />
-                    <AdicionarBtn>+ Adicionar</AdicionarBtn>
+                    <AdicionarBtn onClick={() => adicionarItem(produto)}>
+                      + Adicionar
+                    </AdicionarBtn>
                   </ProdutoInfo>
                   {produto.imagem && (
                     <ProdutoImagem
