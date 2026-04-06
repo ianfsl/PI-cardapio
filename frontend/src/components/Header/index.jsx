@@ -7,7 +7,9 @@ export default function Header() {
 
   return (
     <HeaderContainer>
-      <Logo>🍔 Big Gula</Logo>
+      <Logo as={Link} to="/">
+        🍔 Big Gula
+      </Logo>
       <Nav>
         <Link to="/">Cardápio</Link>
         <Link to="/admin">Admin</Link>

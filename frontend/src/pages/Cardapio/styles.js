@@ -7,22 +7,22 @@ export const Container = styled.div`
 
 export const Banner = styled.div`
   width: 100%;
-  height: 200px;
-  background-color: #c1440e;
+  height: 300px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.7;
+    object-position: center 48%;
+    opacity: 0.85;
   }
 
   @media (min-width: 768px) {
-    height: 280px;
+    height: 400px;
   }
 `;
 
