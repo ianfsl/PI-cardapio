@@ -1,15 +1,12 @@
-import mysql2 from "mysql2/promise";
-import dotenv from "dotenv";
+import Database from "better-sqlite3";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const pool = mysql2.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-});
+const db = new Database(path.join(__dirname, "DB-PI-III.db"));
 
-export default pool;
+db.pragma("journal_mode = WAL");
+
+export default db;

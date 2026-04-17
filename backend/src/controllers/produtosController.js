@@ -1,13 +1,18 @@
-import pool from "../database/db.js";
+import db from "../database/db.js";
 
-export const listarProdutos = async (req, res) => {
+// Listar todos os produtos
+export const listarProdutos = (req, res) => {
   try {
-    const [produtos] = await pool.query(`
-      SELECT p.idProduto, p.nomeProduto, p.valorProduto, 
-             c.idCategoria, c.nomeCategoria
+    const produtos = db
+      .prepare(
+        `
+      SELECT p.idProduto, p."Nome do produto", p."Valor do produto",
+             c.idCategoria, c."Nome da categoria"
       FROM Produtos p
-      JOIN Categoria c ON p.categoriaId = c.idCategoria
-    `);
+      JOIN Categoria c ON p."Categoria do produto" = c.idCategoria
+    `,
+      )
+      .all();
     res.json(produtos);
   } catch (error) {
     console.error("Erro ao listar produtos:", error);
@@ -15,43 +20,47 @@ export const listarProdutos = async (req, res) => {
   }
 };
 
-export const buscarProdutoPorId = async (req, res) => {
+// Buscar produto por ID
+export const buscarProdutoPorId = (req, res) => {
   try {
     const { id } = req.params;
-    const [produto] = await pool.query(
-      `
-      SELECT p.idProduto, p.nomeProduto, p.valorProduto,
-             c.idCategoria, c.nomeCategoria
+    const produto = db
+      .prepare(
+        `
+      SELECT p.idProduto, p."Nome do produto", p."Valor do produto",
+             c.idCategoria, c."Nome da categoria"
       FROM Produtos p
-      JOIN Categoria c ON p.categoriaId = c.idCategoria
+      JOIN Categoria c ON p."Categoria do produto" = c.idCategoria
       WHERE p.idProduto = ?
     `,
-      [id],
-    );
+      )
+      .get(id);
 
-    if (produto.length === 0) {
+    if (!produto) {
       return res.status(404).json({ error: "Produto não encontrado." });
     }
 
-    res.json(produto[0]);
+    res.json(produto);
   } catch (error) {
     console.error("Erro ao buscar produto:", error);
     res.status(500).json({ error: "Erro ao buscar produto." });
   }
 };
 
-export const criarProduto = async (req, res) => {
+// Criar produto
+export const criarProduto = (req, res) => {
   try {
     const { nomeProduto, valorProduto, categoriaId } = req.body;
 
-    const [resultado] = await pool.query(
-      "INSERT INTO Produtos (nomeProduto, valorProduto, categoriaId) VALUES (?, ?, ?)",
-      [nomeProduto, valorProduto, categoriaId],
-    );
+    const resultado = db
+      .prepare(
+        `INSERT INTO Produtos ("Nome do produto", "Valor do produto", "Categoria do produto") VALUES (?, ?, ?)`,
+      )
+      .run(nomeProduto, valorProduto, categoriaId);
 
     res.status(201).json({
       message: "Produto criado com sucesso!",
-      id: resultado.insertId,
+      id: resultado.lastInsertRowid,
     });
   } catch (error) {
     console.error("Erro ao criar produto:", error);
@@ -59,17 +68,19 @@ export const criarProduto = async (req, res) => {
   }
 };
 
-export const editarProduto = async (req, res) => {
+// Editar produto
+export const editarProduto = (req, res) => {
   try {
     const { id } = req.params;
     const { nomeProduto, valorProduto, categoriaId } = req.body;
 
-    const [resultado] = await pool.query(
-      "UPDATE Produtos SET nomeProduto = ?, valorProduto = ?, categoriaId = ? WHERE idProduto = ?",
-      [nomeProduto, valorProduto, categoriaId, id],
-    );
+    const resultado = db
+      .prepare(
+        `UPDATE Produtos SET "Nome do produto" = ?, "Valor do produto" = ?, "Categoria do produto" = ? WHERE idProduto = ?`,
+      )
+      .run(nomeProduto, valorProduto, categoriaId, id);
 
-    if (resultado.affectedRows === 0) {
+    if (resultado.changes === 0) {
       return res.status(404).json({ error: "Produto não encontrado." });
     }
 
@@ -80,16 +91,16 @@ export const editarProduto = async (req, res) => {
   }
 };
 
-export const deletarProduto = async (req, res) => {
+// Deletar produto
+export const deletarProduto = (req, res) => {
   try {
     const { id } = req.params;
 
-    const [resultado] = await pool.query(
-      "DELETE FROM Produtos WHERE idProduto = ?",
-      [id],
-    );
+    const resultado = db
+      .prepare("DELETE FROM Produtos WHERE idProduto = ?")
+      .run(id);
 
-    if (resultado.affectedRows === 0) {
+    if (resultado.changes === 0) {
       return res.status(404).json({ error: "Produto não encontrado." });
     }
 
