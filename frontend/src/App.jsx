@@ -5,6 +5,9 @@ import { CarrinhoProvider } from "./context/CarrinhoContext";
 import Cardapio from "./pages/Cardapio";
 import Carrinho from "./pages/Carrinho";
 import Checkout from "./pages/Checkout";
+import LoginAdmin from "./pages/Admin/Login";
+import Painel from "./pages/Admin/Painel";
+import RotaProtegida from "./components/RotaProtegida";
 
 export default function App() {
   return (
@@ -15,7 +18,15 @@ export default function App() {
         <Route path="/" element={<Cardapio />} />
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/admin" element={<h1>Admin</h1>} />
+        <Route path="/admin" element={<LoginAdmin />} />
+        <Route
+          path="/admin/painel"
+          element={
+            <RotaProtegida>
+              <Painel />
+            </RotaProtegida>
+          }
+        />
       </Routes>
     </CarrinhoProvider>
   );

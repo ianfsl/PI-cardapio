@@ -12,7 +12,6 @@ export default function Header() {
       </Logo>
       <Nav>
         <Link to="/">Cardápio</Link>
-        <Link to="/admin">Admin</Link>
         <CarrinhoBtn as={Link} to="/carrinho">
           🛒 {quantidadeTotal > 0 ? `(${quantidadeTotal})` : ""} Carrinho
         </CarrinhoBtn>
