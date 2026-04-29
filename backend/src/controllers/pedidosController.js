@@ -1,5 +1,13 @@
 import db from "../database/db.js";
 
+// Função auxiliar pra montar a string descritiva do pedido
+// a partir do array de itens do carrinho
+const formatarItens = (itens) => {
+  return itens
+    .map((item) => `${item.quantidade}x ${item.nomeProduto}`)
+    .join(", ");
+};
+
 export const listarPedidos = (req, res) => {
   try {
     const pedidos = db
@@ -29,15 +37,32 @@ export const buscarPedidoPorId = (req, res) => {
 
 export const criarPedido = (req, res) => {
   try {
-    const { nomePedido, valorFinal } = req.body;
+    const { nomeCliente, itens, valorTotal, observacoes } = req.body;
+
+    if (!nomeCliente || !nomeCliente.trim()) {
+      return res.status(400).json({ error: "Nome do cliente é obrigatório." });
+    }
+    if (!Array.isArray(itens) || itens.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "O pedido precisa ter ao menos um item." });
+    }
+    if (typeof valorTotal !== "number" || valorTotal <= 0) {
+      return res.status(400).json({ error: "Valor total inválido." });
+    }
+
+    const descricao = formatarItens(itens);
+
     const resultado = db
       .prepare(
-        "INSERT INTO Pedidos (NomeProdutoPedido, ValorFinalPedido) VALUES (?, ?)",
+        "INSERT INTO Pedidos (NomeCliente, NomeProdutoPedido, ValorFinalPedido, Observacoes) VALUES (?, ?, ?, ?)",
       )
-      .run(nomePedido, valorFinal);
+      .run(nomeCliente.trim(), descricao, valorTotal, observacoes || null);
+
     res.status(201).json({
       message: "Pedido criado com sucesso!",
-      id: resultado.lastInsertRowid,
+      idPedido: resultado.lastInsertRowid,
+      sucesso: true,
     });
   } catch (error) {
     console.error("Erro ao criar pedido:", error);
@@ -48,12 +73,12 @@ export const criarPedido = (req, res) => {
 export const atualizarPedido = (req, res) => {
   try {
     const { id } = req.params;
-    const { nomePedido, valorFinal } = req.body;
+    const { nomeCliente, nomePedido, valorFinal } = req.body;
     const resultado = db
       .prepare(
-        "UPDATE Pedidos SET NomeProdutoPedido = ?, ValorFinalPedido = ? WHERE idPedido = ?",
+        "UPDATE Pedidos SET NomeCliente = ?, NomeProdutoPedido = ?, ValorFinalPedido = ? WHERE idPedido = ?",
       )
-      .run(nomePedido, valorFinal, id);
+      .run(nomeCliente, nomePedido, valorFinal, id);
     if (resultado.changes === 0)
       return res.status(404).json({ error: "Pedido não encontrado." });
     res.json({ message: "Pedido atualizado com sucesso!" });
