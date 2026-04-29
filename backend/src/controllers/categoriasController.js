@@ -14,7 +14,7 @@ export const criarCategoria = (req, res) => {
   try {
     const { nomeCategoria } = req.body;
     const resultado = db
-      .prepare(`INSERT INTO Categoria ("Nome da categoria") VALUES (?)`)
+      .prepare("INSERT INTO Categoria (NomeCategoria) VALUES (?)")
       .run(nomeCategoria);
     res.status(201).json({
       message: "Categoria criada com sucesso!",
@@ -31,9 +31,7 @@ export const editarCategoria = (req, res) => {
     const { id } = req.params;
     const { nomeCategoria } = req.body;
     const resultado = db
-      .prepare(
-        `UPDATE Categoria SET "Nome da categoria" = ? WHERE idCategoria = ?`,
-      )
+      .prepare("UPDATE Categoria SET NomeCategoria = ? WHERE idCategoria = ?")
       .run(nomeCategoria, id);
     if (resultado.changes === 0)
       return res.status(404).json({ error: "Categoria não encontrada." });

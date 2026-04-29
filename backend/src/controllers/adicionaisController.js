@@ -5,10 +5,10 @@ export const listarAdicionais = (req, res) => {
     const adicionais = db
       .prepare(
         `
-      SELECT pa.idAdicional, pa."Nome do produto adicional", pa."Valor extra",
-             c.idCategoria, c."Nome da categoria"
-      FROM "Produtos Adicionais" pa
-      JOIN Categoria c ON pa."Categoria do produto adicional" = c.idCategoria
+      SELECT pa.idAdicional, pa.NomeProdutoAdicional, pa.ValorExtra, pa.ImagemProdutosAdicionais,
+             c.idCategoria, c.NomeCategoria
+      FROM ProdutosAdicionais pa
+      JOIN Categoria c ON pa.CategoriaProdutoAdicional = c.idCategoria
     `,
       )
       .all();
@@ -21,12 +21,12 @@ export const listarAdicionais = (req, res) => {
 
 export const criarAdicional = (req, res) => {
   try {
-    const { nomeAdicional, valorExtra, categoriaId } = req.body;
+    const { nomeAdicional, valorExtra, categoriaId, imagem } = req.body;
     const resultado = db
       .prepare(
-        `INSERT INTO "Produtos Adicionais" ("Nome do produto adicional", "Valor extra", "Categoria do produto adicional") VALUES (?, ?, ?)`,
+        `INSERT INTO ProdutosAdicionais (NomeProdutoAdicional, ValorExtra, CategoriaProdutoAdicional, ImagemProdutosAdicionais) VALUES (?, ?, ?, ?)`,
       )
-      .run(nomeAdicional, valorExtra, categoriaId);
+      .run(nomeAdicional, valorExtra, categoriaId, imagem);
     res.status(201).json({
       message: "Adicional criado com sucesso!",
       id: resultado.lastInsertRowid,
@@ -40,12 +40,12 @@ export const criarAdicional = (req, res) => {
 export const editarAdicional = (req, res) => {
   try {
     const { id } = req.params;
-    const { nomeAdicional, valorExtra, categoriaId } = req.body;
+    const { nomeAdicional, valorExtra, categoriaId, imagem } = req.body;
     const resultado = db
       .prepare(
-        `UPDATE "Produtos Adicionais" SET "Nome do produto adicional" = ?, "Valor extra" = ?, "Categoria do produto adicional" = ? WHERE idAdicional = ?`,
+        `UPDATE ProdutosAdicionais SET NomeProdutoAdicional = ?, ValorExtra = ?, CategoriaProdutoAdicional = ?, ImagemProdutosAdicionais = ? WHERE idAdicional = ?`,
       )
-      .run(nomeAdicional, valorExtra, categoriaId, id);
+      .run(nomeAdicional, valorExtra, categoriaId, imagem, id);
     if (resultado.changes === 0)
       return res.status(404).json({ error: "Adicional não encontrado." });
     res.json({ message: "Adicional atualizado com sucesso!" });
@@ -59,7 +59,7 @@ export const deletarAdicional = (req, res) => {
   try {
     const { id } = req.params;
     const resultado = db
-      .prepare(`DELETE FROM "Produtos Adicionais" WHERE idAdicional = ?`)
+      .prepare(`DELETE FROM ProdutosAdicionais WHERE idAdicional = ?`)
       .run(id);
     if (resultado.changes === 0)
       return res.status(404).json({ error: "Adicional não encontrado." });

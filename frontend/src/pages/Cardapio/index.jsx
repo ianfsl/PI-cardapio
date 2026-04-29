@@ -25,11 +25,21 @@ export default function Cardapio() {
     const fetchDados = async () => {
       try {
         setCarregando(true);
-        const [resProdutos, resCategorias] = await Promise.all([
+        const [resProdutos, resCategorias, resAdicionais] = await Promise.all([
           axios.get(`${API_URL}/produtos`),
           axios.get(`${API_URL}/categorias`),
+          axios.get(`${API_URL}/adicionais`),
         ]);
-        setProdutos(resProdutos.data);
+
+        const adicionaisFormatados = resAdicionais.data.map((a) => ({
+          idProduto: `adicional-${a.idAdicional}`,
+          NomeProduto: a.NomeProdutoAdicional,
+          ValorProduto: a.ValorExtra,
+          ImagemProdutos: a.ImagemProdutosAdicionais,
+          idCategoria: a.idCategoria,
+        }));
+
+        setProdutos([...resProdutos.data, ...adicionaisFormatados]);
         setCategorias(resCategorias.data);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
@@ -62,7 +72,7 @@ export default function Cardapio() {
     <Container>
       <Banner>
         <img
-          src="https://scontent.fqps4-1.fna.fbcdn.net/v/t39.30808-6/514415600_24380730981525099_7211097753478312869_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=13d280&_nc_ohc=17oaKxfQWhEQ7kNvwFH7pqw&_nc_oc=AdotpeC3RObD7sykh-D6FOx2I2avQnZLzhGWQJP3nfsWM0L-3z5cwAgW668K5lQ95eI&_nc_zt=23&_nc_ht=scontent.fqps4-1.fna&_nc_gid=7IojjFddYCQY3ToLih40zw&_nc_ss=7a389&oh=00_AfyKZSRA_f1VTrzkBiTH26MMEAIpNovWa2TOW06v12hslw&oe=69D1F159"
+          src="https://images.unsplash.com/photo-1550317138-10000687a72b?w=2000"
           alt="Big Gula"
         />
       </Banner>
@@ -77,33 +87,31 @@ export default function Cardapio() {
 
           return (
             <CategoriaSection key={categoria.idCategoria}>
-              <CategoriaTitulo>
-                {categoria["Nome da categoria"]}
-              </CategoriaTitulo>
+              <CategoriaTitulo>{categoria.NomeCategoria}</CategoriaTitulo>
               {produtosDaCategoria.map((produto) => (
                 <ProdutoCard key={produto.idProduto}>
                   <ProdutoInfo>
-                    <h3>{produto["Nome do produto"]}</h3>
+                    <h3>{produto.NomeProduto}</h3>
                     <span>
-                      R$ {parseFloat(produto["Valor do produto"]).toFixed(2)}
+                      R$ {parseFloat(produto.ValorProduto).toFixed(2)}
                     </span>
                     <br />
                     <AdicionarBtn
                       onClick={() =>
                         adicionarItem({
                           idProduto: produto.idProduto,
-                          nomeProduto: produto["Nome do produto"],
-                          valorProduto: parseFloat(produto["Valor do produto"]),
+                          nomeProduto: produto.NomeProduto,
+                          valorProduto: parseFloat(produto.ValorProduto),
                         })
                       }
                     >
                       + Adicionar
                     </AdicionarBtn>
                   </ProdutoInfo>
-                  {produto.imagem && (
+                  {produto.ImagemProdutos && (
                     <ProdutoImagem
-                      src={produto.imagem}
-                      alt={produto["Nome do produto"]}
+                      src={produto.ImagemProdutos}
+                      alt={produto.NomeProduto}
                     />
                   )}
                 </ProdutoCard>

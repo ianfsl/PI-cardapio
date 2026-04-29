@@ -1,15 +1,14 @@
 import db from "../database/db.js";
 
-// Listar todos os produtos
 export const listarProdutos = (req, res) => {
   try {
     const produtos = db
       .prepare(
         `
-      SELECT p.idProduto, p."Nome do produto", p."Valor do produto",
-             c.idCategoria, c."Nome da categoria"
+      SELECT p.idProduto, p.NomeProduto, p.ValorProduto, p.ImagemProdutos,
+             c.idCategoria, c.NomeCategoria
       FROM Produtos p
-      JOIN Categoria c ON p."Categoria do produto" = c.idCategoria
+      JOIN Categoria c ON p.CategoriaProduto = c.idCategoria
     `,
       )
       .all();
@@ -20,26 +19,22 @@ export const listarProdutos = (req, res) => {
   }
 };
 
-// Buscar produto por ID
 export const buscarProdutoPorId = (req, res) => {
   try {
     const { id } = req.params;
     const produto = db
       .prepare(
         `
-      SELECT p.idProduto, p."Nome do produto", p."Valor do produto",
-             c.idCategoria, c."Nome da categoria"
+      SELECT p.idProduto, p.NomeProduto, p.ValorProduto, p.ImagemProdutos,
+             c.idCategoria, c.NomeCategoria
       FROM Produtos p
-      JOIN Categoria c ON p."Categoria do produto" = c.idCategoria
+      JOIN Categoria c ON p.CategoriaProduto = c.idCategoria
       WHERE p.idProduto = ?
     `,
       )
       .get(id);
-
-    if (!produto) {
+    if (!produto)
       return res.status(404).json({ error: "Produto não encontrado." });
-    }
-
     res.json(produto);
   } catch (error) {
     console.error("Erro ao buscar produto:", error);
@@ -47,17 +42,14 @@ export const buscarProdutoPorId = (req, res) => {
   }
 };
 
-// Criar produto
 export const criarProduto = (req, res) => {
   try {
-    const { nomeProduto, valorProduto, categoriaId } = req.body;
-
+    const { nomeProduto, valorProduto, categoriaId, imagem } = req.body;
     const resultado = db
       .prepare(
-        `INSERT INTO Produtos ("Nome do produto", "Valor do produto", "Categoria do produto") VALUES (?, ?, ?)`,
+        "INSERT INTO Produtos (NomeProduto, ValorProduto, CategoriaProduto, ImagemProdutos) VALUES (?, ?, ?, ?)",
       )
-      .run(nomeProduto, valorProduto, categoriaId);
-
+      .run(nomeProduto, valorProduto, categoriaId, imagem);
     res.status(201).json({
       message: "Produto criado com sucesso!",
       id: resultado.lastInsertRowid,
@@ -68,22 +60,17 @@ export const criarProduto = (req, res) => {
   }
 };
 
-// Editar produto
 export const editarProduto = (req, res) => {
   try {
     const { id } = req.params;
-    const { nomeProduto, valorProduto, categoriaId } = req.body;
-
+    const { nomeProduto, valorProduto, categoriaId, imagem } = req.body;
     const resultado = db
       .prepare(
-        `UPDATE Produtos SET "Nome do produto" = ?, "Valor do produto" = ?, "Categoria do produto" = ? WHERE idProduto = ?`,
+        "UPDATE Produtos SET NomeProduto = ?, ValorProduto = ?, CategoriaProduto = ?, ImagemProdutos = ? WHERE idProduto = ?",
       )
-      .run(nomeProduto, valorProduto, categoriaId, id);
-
-    if (resultado.changes === 0) {
+      .run(nomeProduto, valorProduto, categoriaId, imagem, id);
+    if (resultado.changes === 0)
       return res.status(404).json({ error: "Produto não encontrado." });
-    }
-
     res.json({ message: "Produto atualizado com sucesso!" });
   } catch (error) {
     console.error("Erro ao editar produto:", error);
@@ -91,19 +78,14 @@ export const editarProduto = (req, res) => {
   }
 };
 
-// Deletar produto
 export const deletarProduto = (req, res) => {
   try {
     const { id } = req.params;
-
     const resultado = db
       .prepare("DELETE FROM Produtos WHERE idProduto = ?")
       .run(id);
-
-    if (resultado.changes === 0) {
+    if (resultado.changes === 0)
       return res.status(404).json({ error: "Produto não encontrado." });
-    }
-
     res.json({ message: "Produto deletado com sucesso!" });
   } catch (error) {
     console.error("Erro ao deletar produto:", error);

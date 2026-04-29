@@ -32,7 +32,7 @@ export const criarPedido = (req, res) => {
     const { nomePedido, valorFinal } = req.body;
     const resultado = db
       .prepare(
-        `INSERT INTO Pedidos ("Nome do produto pedido", "Valor final do pedido") VALUES (?, ?)`,
+        "INSERT INTO Pedidos (NomeProdutoPedido, ValorFinalPedido) VALUES (?, ?)",
       )
       .run(nomePedido, valorFinal);
     res.status(201).json({
@@ -51,7 +51,7 @@ export const atualizarPedido = (req, res) => {
     const { nomePedido, valorFinal } = req.body;
     const resultado = db
       .prepare(
-        `UPDATE Pedidos SET "Nome do produto pedido" = ?, "Valor final do pedido" = ? WHERE idPedido = ?`,
+        "UPDATE Pedidos SET NomeProdutoPedido = ?, ValorFinalPedido = ? WHERE idPedido = ?",
       )
       .run(nomePedido, valorFinal, id);
     if (resultado.changes === 0)

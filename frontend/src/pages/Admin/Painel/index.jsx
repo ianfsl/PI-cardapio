@@ -73,10 +73,10 @@ export default function Painel() {
   const abrirModalEditar = (produto) => {
     setProdutoEditando(produto);
     setForm({
-      nomeProduto: produto["Nome do produto"],
-      valorProduto: produto["Valor do produto"],
+      nomeProduto: produto.NomeProduto,
+      valorProduto: produto.ValorProduto,
       categoriaId: produto.idCategoria,
-      imagem: produto.imagem || "",
+      imagem: produto.ImagemProdutos || "",
     });
     setModalAberto(true);
   };
@@ -128,10 +128,8 @@ export default function Painel() {
         {produtos.map((produto) => (
           <ProdutoItem key={produto.idProduto}>
             <ProdutoNome>
-              <h3>{produto["Nome do produto"]}</h3>
-              <span>
-                R$ {parseFloat(produto["Valor do produto"]).toFixed(2)}
-              </span>
+              <h3>{produto.NomeProduto}</h3>
+              <span>R$ {parseFloat(produto.ValorProduto).toFixed(2)}</span>
             </ProdutoNome>
             <Acoes>
               <BotaoEditar onClick={() => abrirModalEditar(produto)}>
@@ -184,7 +182,7 @@ export default function Painel() {
                   <option value="">Selecione uma categoria</option>
                   {categorias.map((cat) => (
                     <option key={cat.idCategoria} value={cat.idCategoria}>
-                      {cat["Nome da categoria"]}
+                      {cat.NomeCategoria}
                     </option>
                   ))}
                 </Select>
