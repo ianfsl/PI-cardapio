@@ -9,7 +9,7 @@ export const loginAdmin = (req, res) => {
   try {
     const { email, senha } = req.body;
     const usuario = db
-      .prepare(`SELECT * FROM Usuário WHERE "e-mail" = ?`)
+      .prepare(`SELECT * FROM Usuarios WHERE "e-mail" = ?`)
       .get(email);
     if (!usuario)
       return res.status(401).json({ error: "E-mail ou senha inválidos." });
@@ -19,7 +19,7 @@ export const loginAdmin = (req, res) => {
       return res.status(401).json({ error: "E-mail ou senha inválidos." });
 
     const token = jwt.sign(
-      { id: usuario["idUsuário"], email: usuario["e-mail"] },
+      { id: usuario.idUsuario, email: usuario["e-mail"] },
       process.env.JWT_SECRET,
       { expiresIn: "8h" },
     );
@@ -35,14 +35,14 @@ export const cadastrarAdmin = (req, res) => {
   try {
     const { nome, email, senha } = req.body;
     const existente = db
-      .prepare(`SELECT * FROM Usuário WHERE "e-mail" = ?`)
+      .prepare(`SELECT * FROM Usuarios WHERE "e-mail" = ?`)
       .get(email);
     if (existente)
       return res.status(400).json({ error: "E-mail já cadastrado." });
 
     const senhaCriptografada = bcrypt.hashSync(senha, 10);
     const resultado = db
-      .prepare(`INSERT INTO Usuário (Nome, "e-mail", senha) VALUES (?, ?, ?)`)
+      .prepare(`INSERT INTO Usuarios (Nome, "e-mail", senha) VALUES (?, ?, ?)`)
       .run(nome, email, senhaCriptografada);
 
     res.status(201).json({

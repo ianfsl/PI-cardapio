@@ -30,34 +30,46 @@ export default function Carrinho() {
     <Container>
       <Titulo>Meu Carrinho</Titulo>
 
-      {itens.map((item) => (
-        <ItemCard key={item.idProduto}>
-          <ItemInfo>
-            <h3>{item.nomeProduto}</h3>
-            <span>R$ {(item.valorProduto * item.quantidade).toFixed(2)}</span>
-          </ItemInfo>
+      {itens.map((item) => {
+        const categoriasComPrefixo = ["BIG", "Baby"];
+        const prefixo = categoriasComPrefixo.includes(item.categoria)
+          ? `${item.categoria} `
+          : "";
 
-          <QuantidadeWrapper>
-            <button
-              onClick={() =>
-                alterarQuantidade(item.idProduto, item.quantidade - 1)
-              }
-            >
-              −
-            </button>
-            <span>{item.quantidade}</span>
-            <button
-              onClick={() =>
-                alterarQuantidade(item.idProduto, item.quantidade + 1)
-              }
-            >
-              +
-            </button>
-          </QuantidadeWrapper>
+        return (
+          <ItemCard key={item.idProduto}>
+            <ItemInfo>
+              <h3>
+                {prefixo}
+                {item.nomeProduto}
+              </h3>
+              <span>R$ {(item.valorProduto * item.quantidade).toFixed(2)}</span>
+            </ItemInfo>
 
-          <RemoverBtn onClick={() => removerItem(item.idProduto)}>✕</RemoverBtn>
-        </ItemCard>
-      ))}
+            <QuantidadeWrapper>
+              <button
+                onClick={() =>
+                  alterarQuantidade(item.idProduto, item.quantidade - 1)
+                }
+              >
+                −
+              </button>
+              <span>{item.quantidade}</span>
+              <button
+                onClick={() =>
+                  alterarQuantidade(item.idProduto, item.quantidade + 1)
+                }
+              >
+                +
+              </button>
+            </QuantidadeWrapper>
+
+            <RemoverBtn onClick={() => removerItem(item.idProduto)}>
+              ✕
+            </RemoverBtn>
+          </ItemCard>
+        );
+      })}
 
       <Rodape>
         <Total>

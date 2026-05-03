@@ -38,6 +38,7 @@ export default function Checkout() {
           nomeProduto: item.nomeProduto,
           quantidade: item.quantidade,
           valorProduto: item.valorProduto,
+          categoria: item.categoria,
         })),
         valorTotal: total,
         observacoes: observacoes.trim() || null,
@@ -63,14 +64,22 @@ export default function Checkout() {
       <Titulo>Finalizar Pedido</Titulo>
 
       <ResumoBox>
-        {itens.map((item) => (
-          <ResumoItem key={item.idProduto}>
-            <span>
-              {item.nomeProduto} x{item.quantidade}
-            </span>
-            <span>R$ {(item.valorProduto * item.quantidade).toFixed(2)}</span>
-          </ResumoItem>
-        ))}
+        {itens.map((item) => {
+          const categoriasComPrefixo = ["BIG", "Baby"];
+          const prefixo = categoriasComPrefixo.includes(item.categoria)
+            ? `${item.categoria} `
+            : "";
+
+          return (
+            <ResumoItem key={item.idProduto}>
+              <span>
+                {prefixo}
+                {item.nomeProduto} x{item.quantidade}
+              </span>
+              <span>R$ {(item.valorProduto * item.quantidade).toFixed(2)}</span>
+            </ResumoItem>
+          );
+        })}
         <ResumoTotal>
           <span>Total</span>
           <span>R$ {total.toFixed(2)}</span>

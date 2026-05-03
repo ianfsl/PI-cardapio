@@ -102,6 +102,7 @@ export default function Cardapio() {
                           idProduto: produto.idProduto,
                           nomeProduto: produto.NomeProduto,
                           valorProduto: parseFloat(produto.ValorProduto),
+                          categoria: categoria.NomeCategoria,
                         })
                       }
                     >

@@ -1,10 +1,14 @@
 import db from "../database/db.js";
 
-// Função auxiliar pra montar a string descritiva do pedido
-// a partir do array de itens do carrinho
 const formatarItens = (itens) => {
+  const categoriasComPrefixo = ["BIG", "Baby"];
   return itens
-    .map((item) => `${item.quantidade}x ${item.nomeProduto}`)
+    .map((item) => {
+      const prefixo = categoriasComPrefixo.includes(item.categoria)
+        ? `${item.categoria} `
+        : "";
+      return `${item.quantidade}x ${prefixo}${item.nomeProduto}`;
+    })
     .join(", ");
 };
 
