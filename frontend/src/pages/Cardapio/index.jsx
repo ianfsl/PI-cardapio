@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import API_URL from "../../config/api";
 import { useCarrinho } from "../../context/CarrinhoContext";
+import ModalAdicionais from "./ModalAdicionais";
 import {
   Container,
   Banner,
@@ -14,11 +15,15 @@ import {
   AdicionarBtn,
 } from "./styles";
 
+const CATEGORIAS_LANCHE = ["BIG", "Baby"];
+
 export default function Cardapio() {
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [adicionais, setAdicionais] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
+  const [produtoNoModal, setProdutoNoModal] = useState(null);
   const { adicionarItem } = useCarrinho();
 
   useEffect(() => {
@@ -31,7 +36,7 @@ export default function Cardapio() {
           axios.get(`${API_URL}/adicionais`),
         ]);
 
-        const adicionaisFormatados = resAdicionais.data.map((a) => ({
+        const adicionaisComoProdutos = resAdicionais.data.map((a) => ({
           idProduto: `adicional-${a.idAdicional}`,
           NomeProduto: a.NomeProdutoAdicional,
           ValorProduto: a.ValorExtra,
@@ -39,8 +44,15 @@ export default function Cardapio() {
           idCategoria: a.idCategoria,
         }));
 
-        setProdutos([...resProdutos.data, ...adicionaisFormatados]);
+        const adicionaisParaModal = resAdicionais.data.map((a) => ({
+          idAdicional: a.idAdicional,
+          nomeAdicional: a.NomeProdutoAdicional,
+          valorExtra: parseFloat(a.ValorExtra),
+        }));
+
+        setProdutos([...resProdutos.data, ...adicionaisComoProdutos]);
         setCategorias(resCategorias.data);
+        setAdicionais(adicionaisParaModal);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
         setErro("Erro ao carregar o cardápio. Tente novamente.");
@@ -51,6 +63,26 @@ export default function Cardapio() {
 
     fetchDados();
   }, []);
+
+  const handleAdicionar = (produto, nomeCategoria) => {
+    const dadosProduto = {
+      idProduto: produto.idProduto,
+      nomeProduto: produto.NomeProduto,
+      valorProduto: parseFloat(produto.ValorProduto),
+      categoria: nomeCategoria,
+    };
+
+    if (CATEGORIAS_LANCHE.includes(nomeCategoria)) {
+      setProdutoNoModal(dadosProduto);
+    } else {
+      adicionarItem(dadosProduto);
+    }
+  };
+
+  const handleConfirmarModal = (adicionaisSelecionados) => {
+    adicionarItem(produtoNoModal, adicionaisSelecionados);
+    setProdutoNoModal(null);
+  };
 
   if (carregando) {
     return (
@@ -98,12 +130,7 @@ export default function Cardapio() {
                     <br />
                     <AdicionarBtn
                       onClick={() =>
-                        adicionarItem({
-                          idProduto: produto.idProduto,
-                          nomeProduto: produto.NomeProduto,
-                          valorProduto: parseFloat(produto.ValorProduto),
-                          categoria: categoria.NomeCategoria,
-                        })
+                        handleAdicionar(produto, categoria.NomeCategoria)
                       }
                     >
                       + Adicionar
@@ -121,6 +148,15 @@ export default function Cardapio() {
           );
         })}
       </Conteudo>
+
+      {produtoNoModal && (
+        <ModalAdicionais
+          produto={produtoNoModal}
+          adicionaisDisponiveis={adicionais}
+          onCancelar={() => setProdutoNoModal(null)}
+          onConfirmar={handleConfirmarModal}
+        />
+      )}
     </Container>
   );
 }

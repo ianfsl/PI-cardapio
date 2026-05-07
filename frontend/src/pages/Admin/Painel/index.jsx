@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_URL from "../../../config/api";
+import AbasAdmin from "../../../components/AbasAdmin";
 import {
   Container,
   Cabecalho,
@@ -122,6 +123,7 @@ export default function Painel() {
         <BotaoSair onClick={handleSair}>Sair</BotaoSair>
       </Cabecalho>
 
+      <AbasAdmin />
       <BotaoAdicionar onClick={abrirModalNovo}>+ Novo Produto</BotaoAdicionar>
 
       <TabelaProdutos>

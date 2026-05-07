@@ -103,3 +103,15 @@ export const ConfirmarBtn = styled.button`
     cursor: not-allowed;
   }
 `;
+
+export const ResumoAdicionais = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0 0 0.4rem 1rem;
+`;
+
+export const ResumoAdicionalLinha = styled.span`
+  font-size: 0.8rem;
+  color: #777;
+`;

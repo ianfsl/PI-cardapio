@@ -7,9 +7,16 @@ const formatarItens = (itens) => {
       const prefixo = categoriasComPrefixo.includes(item.categoria)
         ? `${item.categoria} `
         : "";
-      return `${item.quantidade}x ${prefixo}${item.nomeProduto}`;
+      const base = `${item.quantidade}x ${prefixo}${item.nomeProduto}`;
+      if (Array.isArray(item.adicionais) && item.adicionais.length > 0) {
+        const adicionaisStr = item.adicionais
+          .map((a) => `+ ${a.nomeAdicional}`)
+          .join(", ");
+        return `${base} (${adicionaisStr})`;
+      }
+      return base;
     })
-    .join(", ");
+    .join(" | ");
 };
 
 export const listarPedidos = (req, res) => {

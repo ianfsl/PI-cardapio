@@ -11,7 +11,7 @@ import { autenticarToken } from "../middleware/auth.js";
 const router = Router();
 
 router.get("/", autenticarToken, listarPedidos);
-router.get("/:id", autenticarToken, buscarPedidoPorId);
+router.get("/:id", buscarPedidoPorId);
 router.post("/", criarPedido);
 router.put("/:id", autenticarToken, atualizarPedido);
 router.delete("/:id", autenticarToken, deletarPedido);

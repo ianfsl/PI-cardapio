@@ -5,8 +5,10 @@ import { CarrinhoProvider } from "./context/CarrinhoContext";
 import Cardapio from "./pages/Cardapio";
 import Carrinho from "./pages/Carrinho";
 import Checkout from "./pages/Checkout";
+import Pedido from "./pages/Pedido";
 import LoginAdmin from "./pages/Admin/Login";
 import Painel from "./pages/Admin/Painel";
+import PedidosAdmin from "./pages/Admin/Pedidos";
 import RotaProtegida from "./components/RotaProtegida";
 
 export default function App() {
@@ -18,12 +20,21 @@ export default function App() {
         <Route path="/" element={<Cardapio />} />
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/pedido/:id" element={<Pedido />} />
         <Route path="/admin" element={<LoginAdmin />} />
         <Route
           path="/admin/painel"
           element={
             <RotaProtegida>
               <Painel />
+            </RotaProtegida>
+          }
+        />
+        <Route
+          path="/admin/pedidos"
+          element={
+            <RotaProtegida>
+              <PedidosAdmin />
             </RotaProtegida>
           }
         />

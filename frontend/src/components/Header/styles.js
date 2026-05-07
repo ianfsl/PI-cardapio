@@ -52,3 +52,20 @@ export const CarrinhoBtn = styled.button`
     background-color: #f48c06;
   }
 `;
+
+export const PedidoAtivoBtn = styled.button`
+  && {
+    background-color: #fff;
+    color: #c1440e;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    &:hover {
+      background-color: #ffe0c2;
+      color: #c1440e;
+    }
+  }
+`;

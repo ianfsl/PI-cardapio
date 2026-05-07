@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCarrinho } from "../../context/CarrinhoContext";
@@ -8,6 +8,8 @@ import {
   Titulo,
   ResumoBox,
   ResumoItem,
+  ResumoAdicionais,
+  ResumoAdicionalLinha,
   ResumoTotal,
   Form,
   Label,
@@ -16,11 +18,17 @@ import {
 } from "./styles";
 
 export default function Checkout() {
-  const { itens, total, limparCarrinho } = useCarrinho();
+  const { itens, total, limparCarrinho, valorDoItem } = useCarrinho();
   const navigate = useNavigate();
   const [nome, setNome] = useState("");
   const [observacoes, setObservacoes] = useState("");
   const [enviando, setEnviando] = useState(false);
+
+  useEffect(() => {
+    if (itens.length === 0 && !enviando) {
+      navigate("/");
+    }
+  }, [itens.length, enviando, navigate]);
 
   const handleFinalizar = async () => {
     if (!nome.trim()) {
@@ -39,25 +47,31 @@ export default function Checkout() {
           quantidade: item.quantidade,
           valorProduto: item.valorProduto,
           categoria: item.categoria,
+          adicionais: item.adicionais.map((a) => ({
+            idAdicional: a.idAdicional,
+            nomeAdicional: a.nomeAdicional,
+            valorExtra: a.valorExtra,
+          })),
         })),
         valorTotal: total,
         observacoes: observacoes.trim() || null,
       });
 
-      alert(`Pedido #${data.idPedido} de ${nome} realizado com sucesso! 🎉`);
+      localStorage.setItem(
+        "pedidoAtivo",
+        JSON.stringify({
+          idPedido: data.idPedido,
+          timestamp: Date.now(),
+        }),
+      );
       limparCarrinho();
-      navigate("/");
+      navigate(`/pedido/${data.idPedido}`, { state: { recemCriado: true } });
     } catch (err) {
       console.error("Erro ao finalizar pedido:", err);
       alert("Erro ao finalizar o pedido. Tente novamente.");
       setEnviando(false);
     }
   };
-
-  if (itens.length === 0) {
-    navigate("/");
-    return null;
-  }
 
   return (
     <Container>
@@ -71,13 +85,24 @@ export default function Checkout() {
             : "";
 
           return (
-            <ResumoItem key={item.idProduto}>
-              <span>
-                {prefixo}
-                {item.nomeProduto} x{item.quantidade}
-              </span>
-              <span>R$ {(item.valorProduto * item.quantidade).toFixed(2)}</span>
-            </ResumoItem>
+            <div key={item.idItem}>
+              <ResumoItem>
+                <span>
+                  {prefixo}
+                  {item.nomeProduto} x{item.quantidade}
+                </span>
+                <span>R$ {valorDoItem(item).toFixed(2)}</span>
+              </ResumoItem>
+              {item.adicionais.length > 0 && (
+                <ResumoAdicionais>
+                  {item.adicionais.map((a) => (
+                    <ResumoAdicionalLinha key={a.idAdicional}>
+                      + {a.nomeAdicional}
+                    </ResumoAdicionalLinha>
+                  ))}
+                </ResumoAdicionais>
+              )}
+            </div>
           );
         })}
         <ResumoTotal>
@@ -103,7 +128,7 @@ export default function Checkout() {
           <Input
             as="textarea"
             rows={3}
-            placeholder="Ex: bacon no BIG Burger, sem cebola na Baby, maionese à parte..."
+            placeholder="Ex: sem cebola, maionese à parte..."
             value={observacoes}
             onChange={(e) => setObservacoes(e.target.value)}
             disabled={enviando}

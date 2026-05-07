@@ -5,6 +5,8 @@ import {
   Titulo,
   ItemCard,
   ItemInfo,
+  AdicionaisItem,
+  AdicionalLinha,
   QuantidadeWrapper,
   RemoverBtn,
   Rodape,
@@ -14,7 +16,8 @@ import {
 } from "./styles";
 
 export default function Carrinho() {
-  const { itens, removerItem, alterarQuantidade, total } = useCarrinho();
+  const { itens, removerItem, alterarQuantidade, total, valorDoItem } =
+    useCarrinho();
   const navigate = useNavigate();
 
   if (itens.length === 0) {
@@ -37,19 +40,28 @@ export default function Carrinho() {
           : "";
 
         return (
-          <ItemCard key={item.idProduto}>
+          <ItemCard key={item.idItem}>
             <ItemInfo>
               <h3>
                 {prefixo}
                 {item.nomeProduto}
               </h3>
-              <span>R$ {(item.valorProduto * item.quantidade).toFixed(2)}</span>
+              {item.adicionais.length > 0 && (
+                <AdicionaisItem>
+                  {item.adicionais.map((a) => (
+                    <AdicionalLinha key={a.idAdicional}>
+                      + {a.nomeAdicional}
+                    </AdicionalLinha>
+                  ))}
+                </AdicionaisItem>
+              )}
+              <span>R$ {valorDoItem(item).toFixed(2)}</span>
             </ItemInfo>
 
             <QuantidadeWrapper>
               <button
                 onClick={() =>
-                  alterarQuantidade(item.idProduto, item.quantidade - 1)
+                  alterarQuantidade(item.idItem, item.quantidade - 1)
                 }
               >
                 −
@@ -57,16 +69,14 @@ export default function Carrinho() {
               <span>{item.quantidade}</span>
               <button
                 onClick={() =>
-                  alterarQuantidade(item.idProduto, item.quantidade + 1)
+                  alterarQuantidade(item.idItem, item.quantidade + 1)
                 }
               >
                 +
               </button>
             </QuantidadeWrapper>
 
-            <RemoverBtn onClick={() => removerItem(item.idProduto)}>
-              ✕
-            </RemoverBtn>
+            <RemoverBtn onClick={() => removerItem(item.idItem)}>✕</RemoverBtn>
           </ItemCard>
         );
       })}

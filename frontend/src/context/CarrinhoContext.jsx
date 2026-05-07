@@ -2,34 +2,57 @@ import { createContext, useContext, useState } from "react";
 
 const CarrinhoContext = createContext();
 
+const mesmosAdicionais = (adA = [], adB = []) => {
+  if (adA.length !== adB.length) return false;
+  const idsA = adA.map((a) => a.idAdicional).sort();
+  const idsB = adB.map((a) => a.idAdicional).sort();
+  return idsA.every((id, i) => id === idsB[i]);
+};
+
 export function CarrinhoProvider({ children }) {
   const [itens, setItens] = useState([]);
 
-  const adicionarItem = (produto) => {
+  const adicionarItem = (produto, adicionais = []) => {
     setItens((prev) => {
-      const itemExistente = prev.find((i) => i.idProduto === produto.idProduto);
-      if (itemExistente) {
+      const itemIgual = prev.find(
+        (i) =>
+          i.idProduto === produto.idProduto &&
+          mesmosAdicionais(i.adicionais, adicionais),
+      );
+
+      if (itemIgual) {
         return prev.map((i) =>
-          i.idProduto === produto.idProduto
+          i.idItem === itemIgual.idItem
             ? { ...i, quantidade: i.quantidade + 1 }
             : i,
         );
       }
-      return [...prev, { ...produto, quantidade: 1 }];
+
+      return [
+        ...prev,
+        {
+          ...produto,
+          idItem: `${produto.idProduto}-${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 7)}`,
+          adicionais,
+          quantidade: 1,
+        },
+      ];
     });
   };
 
-  const removerItem = (idProduto) => {
-    setItens((prev) => prev.filter((i) => i.idProduto !== idProduto));
+  const removerItem = (idItem) => {
+    setItens((prev) => prev.filter((i) => i.idItem !== idItem));
   };
 
-  const alterarQuantidade = (idProduto, quantidade) => {
+  const alterarQuantidade = (idItem, quantidade) => {
     if (quantidade <= 0) {
-      removerItem(idProduto);
+      removerItem(idItem);
       return;
     }
     setItens((prev) =>
-      prev.map((i) => (i.idProduto === idProduto ? { ...i, quantidade } : i)),
+      prev.map((i) => (i.idItem === idItem ? { ...i, quantidade } : i)),
     );
   };
 
@@ -37,10 +60,15 @@ export function CarrinhoProvider({ children }) {
     setItens([]);
   };
 
-  const total = itens.reduce(
-    (acc, item) => acc + item.valorProduto * item.quantidade,
-    0,
-  );
+  const valorDoItem = (item) => {
+    const valorAdicionais = item.adicionais.reduce(
+      (acc, a) => acc + a.valorExtra,
+      0,
+    );
+    return (item.valorProduto + valorAdicionais) * item.quantidade;
+  };
+
+  const total = itens.reduce((acc, item) => acc + valorDoItem(item), 0);
 
   const quantidadeTotal = itens.reduce((acc, item) => acc + item.quantidade, 0);
 
@@ -54,6 +82,7 @@ export function CarrinhoProvider({ children }) {
         limparCarrinho,
         total,
         quantidadeTotal,
+        valorDoItem,
       }}
     >
       {children}
