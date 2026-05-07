@@ -14,6 +14,7 @@ import {
   ProdutoImagem,
   AdicionarBtn,
 } from "./styles";
+import bannerBigGula from "../../assets/banner.jpg";
 
 const CATEGORIAS_LANCHE = ["BIG", "Baby"];
 
@@ -103,10 +104,7 @@ export default function Cardapio() {
   return (
     <Container>
       <Banner>
-        <img
-          src="https://images.unsplash.com/photo-1550317138-10000687a72b?w=2000"
-          alt="Big Gula"
-        />
+        <img src={bannerBigGula} alt="Big Gula" />
       </Banner>
 
       <Conteudo>

@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import GlobalStyles from "./styles/GlobalStyles";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import { CarrinhoProvider } from "./context/CarrinhoContext";
 import Cardapio from "./pages/Cardapio";
 import Carrinho from "./pages/Carrinho";
@@ -10,6 +11,7 @@ import LoginAdmin from "./pages/Admin/Login";
 import Painel from "./pages/Admin/Painel";
 import PedidosAdmin from "./pages/Admin/Pedidos";
 import RotaProtegida from "./components/RotaProtegida";
+import WhatsAppFlutuante from "./components/WhatsAppFlutuante";
 
 export default function App() {
   return (
@@ -39,6 +41,8 @@ export default function App() {
           }
         />
       </Routes>
+      <Footer />
+      <WhatsAppFlutuante />
     </CarrinhoProvider>
   );
 }

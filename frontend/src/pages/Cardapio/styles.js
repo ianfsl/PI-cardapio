@@ -35,20 +35,38 @@ export const Conteudo = styled.div`
 `;
 
 export const CategoriaSection = styled.section`
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+
+  @media (min-width: 768px) {
+    margin-bottom: 3rem;
+  }
 `;
 
 export const CategoriaTitulo = styled.h2`
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 800;
   color: #c1440e;
   text-transform: uppercase;
-  border-left: 4px solid #c1440e;
-  padding-left: 0.5rem;
-  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+  border-left: 6px solid #c1440e;
+  padding: 0.3rem 0 0.3rem 0.7rem;
+  margin-bottom: 1.2rem;
+  position: relative;
+
+  &::after {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 3px;
+    background-color: #e85d04;
+    margin-top: 0.4rem;
+    margin-left: 0;
+  }
 
   @media (min-width: 768px) {
-    font-size: 1.1rem;
+    font-size: 1.6rem;
+    padding: 0.4rem 0 0.4rem 0.9rem;
+    margin-bottom: 1.5rem;
   }
 `;
 
