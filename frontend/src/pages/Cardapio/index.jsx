@@ -9,6 +9,7 @@ import {
   Conteudo,
   CategoriaSection,
   CategoriaTitulo,
+  ProdutosGrid,
   ProdutoCard,
   ProdutoInfo,
   ProdutoImagem,
@@ -118,30 +119,32 @@ export default function Cardapio() {
           return (
             <CategoriaSection key={categoria.idCategoria}>
               <CategoriaTitulo>{categoria.NomeCategoria}</CategoriaTitulo>
-              {produtosDaCategoria.map((produto) => (
-                <ProdutoCard key={produto.idProduto}>
-                  <ProdutoInfo>
-                    <h3>{produto.NomeProduto}</h3>
-                    <span>
-                      R$ {parseFloat(produto.ValorProduto).toFixed(2)}
-                    </span>
-                    <br />
-                    <AdicionarBtn
-                      onClick={() =>
-                        handleAdicionar(produto, categoria.NomeCategoria)
-                      }
-                    >
-                      + Adicionar
-                    </AdicionarBtn>
-                  </ProdutoInfo>
-                  {produto.ImagemProdutos && (
-                    <ProdutoImagem
-                      src={produto.ImagemProdutos}
-                      alt={produto.NomeProduto}
-                    />
-                  )}
-                </ProdutoCard>
-              ))}
+              <ProdutosGrid>
+                {produtosDaCategoria.map((produto) => (
+                  <ProdutoCard key={produto.idProduto}>
+                    <ProdutoInfo>
+                      <h3>{produto.NomeProduto}</h3>
+                      <span>
+                        R$ {parseFloat(produto.ValorProduto).toFixed(2)}
+                      </span>
+                      <br />
+                      <AdicionarBtn
+                        onClick={() =>
+                          handleAdicionar(produto, categoria.NomeCategoria)
+                        }
+                      >
+                        + Adicionar
+                      </AdicionarBtn>
+                    </ProdutoInfo>
+                    {produto.ImagemProdutos && (
+                      <ProdutoImagem
+                        src={`/produtos/${produto.ImagemProdutos}`}
+                        alt={produto.NomeProduto}
+                      />
+                    )}
+                  </ProdutoCard>
+                ))}
+              </ProdutosGrid>
             </CategoriaSection>
           );
         })}

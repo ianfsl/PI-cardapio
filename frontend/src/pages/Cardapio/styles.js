@@ -28,6 +28,8 @@ export const Banner = styled.div`
 
 export const Conteudo = styled.div`
   padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
 
   @media (min-width: 768px) {
     padding: 1.5rem 2rem;
@@ -70,23 +72,50 @@ export const CategoriaTitulo = styled.h2`
   }
 `;
 
+export const ProdutosGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+`;
+
 export const ProdutoCard = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid #eee;
-  gap: 1rem;
+  align-items: stretch;
+  background-color: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  @media (min-width: 768px) {
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+  }
 `;
 
 export const ProdutoInfo = styled.div`
   flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
   h3 {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #333;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
+    line-height: 1.3;
   }
 
   p {
@@ -97,34 +126,32 @@ export const ProdutoInfo = styled.div`
   }
 
   span {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #c1440e;
+    display: block;
+    margin-bottom: 0.6rem;
   }
 `;
 
 export const ProdutoImagem = styled.img`
-  width: 90px;
-  height: 90px;
+  width: 45%;
   object-fit: cover;
-  border-radius: 8px;
   flex-shrink: 0;
-
-  @media (min-width: 768px) {
-    width: 110px;
-    height: 110px;
-  }
+  align-self: stretch;
 `;
 
 export const AdicionarBtn = styled.button`
   background-color: #e85d04;
   color: #fff;
   border: none;
-  padding: 0.4rem 0.9rem;
-  border-radius: 4px;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
-  margin-top: 0.5rem;
+  align-self: flex-start;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 
   &:hover {
     background-color: #c1440e;

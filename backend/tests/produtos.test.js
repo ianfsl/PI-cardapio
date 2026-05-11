@@ -3,7 +3,6 @@ import request from "supertest";
 import app from "../app.js";
 import { resetDb, seedDb } from "./helpers/setupDb.js";
 
-// Helper local: faz login na API e retorna o token
 async function obterToken() {
   const response = await request(app).post("/api/admin/login").send({
     email: "admin@teste.com",
@@ -82,7 +81,7 @@ describe("POST /api/produtos", () => {
   });
 
   it("deve criar produto quando token é válido", async () => {
-    // Arrange: faz login pra obter token, depois prepara o produto
+    // Arrange
     const token = await obterToken();
     const novoProduto = {
       nomeProduto: "BIG X-tudo",
