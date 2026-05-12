@@ -4,6 +4,7 @@ import categoriasRoutes from "./categorias.js";
 import pedidosRoutes from "./pedidos.js";
 import adicionaisRoutes from "./adicionais.js";
 import adminRoutes from "./admin.js";
+import pagamentosRoutes from "./pagamentos.js";
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use("/categorias", categoriasRoutes);
 router.use("/pedidos", pedidosRoutes);
 router.use("/adicionais", adicionaisRoutes);
 router.use("/admin", adminRoutes);
+router.use("/pagamentos", pagamentosRoutes);
 
 export default router;

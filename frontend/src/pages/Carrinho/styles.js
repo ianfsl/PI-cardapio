@@ -122,16 +122,3 @@ export const CarrinhoVazio = styled.p`
   margin-top: 3rem;
   font-size: 0.95rem;
 `;
-
-export const AdicionaisItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  margin: 0.2rem 0 0.4rem;
-`;
-
-export const AdicionalLinha = styled.span`
-  font-size: 0.8rem;
-  color: #777;
-  font-weight: 400;
-`;
