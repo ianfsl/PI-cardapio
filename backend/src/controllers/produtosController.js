@@ -5,7 +5,8 @@ export const listarProdutos = (req, res) => {
     const produtos = db
       .prepare(
         `
-      SELECT p.idProduto, p.NomeProduto, p.ValorProduto, p.ImagemProdutos,
+      SELECT p.idProduto, p.NomeProduto, p.ValorProduto,
+             p.ImagemProduto AS ImagemProdutos,
              c.idCategoria, c.NomeCategoria
       FROM Produtos p
       JOIN Categoria c ON p.CategoriaProduto = c.idCategoria
@@ -25,7 +26,8 @@ export const buscarProdutoPorId = (req, res) => {
     const produto = db
       .prepare(
         `
-      SELECT p.idProduto, p.NomeProduto, p.ValorProduto, p.ImagemProdutos,
+      SELECT p.idProduto, p.NomeProduto, p.ValorProduto,
+             p.ImagemProduto AS ImagemProdutos,
              c.idCategoria, c.NomeCategoria
       FROM Produtos p
       JOIN Categoria c ON p.CategoriaProduto = c.idCategoria
@@ -47,7 +49,7 @@ export const criarProduto = (req, res) => {
     const { nomeProduto, valorProduto, categoriaId, imagem } = req.body;
     const resultado = db
       .prepare(
-        "INSERT INTO Produtos (NomeProduto, ValorProduto, CategoriaProduto, ImagemProdutos) VALUES (?, ?, ?, ?)",
+        "INSERT INTO Produtos (NomeProduto, ValorProduto, CategoriaProduto, ImagemProduto) VALUES (?, ?, ?, ?)",
       )
       .run(nomeProduto, valorProduto, categoriaId, imagem);
     res.status(201).json({
@@ -66,7 +68,7 @@ export const editarProduto = (req, res) => {
     const { nomeProduto, valorProduto, categoriaId, imagem } = req.body;
     const resultado = db
       .prepare(
-        "UPDATE Produtos SET NomeProduto = ?, ValorProduto = ?, CategoriaProduto = ?, ImagemProdutos = ? WHERE idProduto = ?",
+        "UPDATE Produtos SET NomeProduto = ?, ValorProduto = ?, CategoriaProduto = ?, ImagemProduto = ? WHERE idProduto = ?",
       )
       .run(nomeProduto, valorProduto, categoriaId, imagem, id);
     if (resultado.changes === 0)
