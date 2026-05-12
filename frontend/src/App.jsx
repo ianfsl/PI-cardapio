@@ -1,17 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 import GlobalStyles from "./styles/GlobalStyles";
 import Header from "./components/Header";
-import Footer from "./components/Footer";
 import { CarrinhoProvider } from "./context/CarrinhoContext";
 import Cardapio from "./pages/Cardapio";
 import Carrinho from "./pages/Carrinho";
 import Checkout from "./pages/Checkout";
-import Pedido from "./pages/Pedido";
+import PedidoConcluido from "./pages/Pedido";
 import LoginAdmin from "./pages/Admin/Login";
 import Painel from "./pages/Admin/Painel";
-import PedidosAdmin from "./pages/Admin/Pedidos";
 import RotaProtegida from "./components/RotaProtegida";
-import WhatsAppFlutuante from "./components/WhatsAppFlutuante";
 
 export default function App() {
   return (
@@ -22,7 +19,7 @@ export default function App() {
         <Route path="/" element={<Cardapio />} />
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/pedido/:id" element={<Pedido />} />
+        <Route path="/pedido-concluido" element={<PedidoConcluido />} />
         <Route path="/admin" element={<LoginAdmin />} />
         <Route
           path="/admin/painel"
@@ -32,17 +29,7 @@ export default function App() {
             </RotaProtegida>
           }
         />
-        <Route
-          path="/admin/pedidos"
-          element={
-            <RotaProtegida>
-              <PedidosAdmin />
-            </RotaProtegida>
-          }
-        />
       </Routes>
-      <Footer />
-      <WhatsAppFlutuante />
     </CarrinhoProvider>
   );
 }

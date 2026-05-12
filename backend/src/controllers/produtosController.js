@@ -5,12 +5,11 @@ export const listarProdutos = (req, res) => {
     const produtos = db
       .prepare(
         `
-  SELECT p.idProduto, p.NomeProduto, p.ValorProduto,
-         p.ImagemProduto AS ImagemProdutos,
-         c.idCategoria, c.NomeCategoria
-  FROM Produtos p
-  JOIN Categoria c ON p.CategoriaProduto = c.idCategoria
-`,
+      SELECT p.idProduto, p.NomeProduto, p.ValorProduto, p.ImagemProdutos,
+             c.idCategoria, c.NomeCategoria
+      FROM Produtos p
+      JOIN Categoria c ON p.CategoriaProduto = c.idCategoria
+    `,
       )
       .all();
     res.json(produtos);
@@ -26,13 +25,12 @@ export const buscarProdutoPorId = (req, res) => {
     const produto = db
       .prepare(
         `
-  SELECT p.idProduto, p.NomeProduto, p.ValorProduto,
-         p.ImagemProduto AS ImagemProdutos,
-         c.idCategoria, c.NomeCategoria
-  FROM Produtos p
-  JOIN Categoria c ON p.CategoriaProduto = c.idCategoria
-  WHERE p.idProduto = ?
-`,
+      SELECT p.idProduto, p.NomeProduto, p.ValorProduto, p.ImagemProdutos,
+             c.idCategoria, c.NomeCategoria
+      FROM Produtos p
+      JOIN Categoria c ON p.CategoriaProduto = c.idCategoria
+      WHERE p.idProduto = ?
+    `,
       )
       .get(id);
     if (!produto)
@@ -49,7 +47,7 @@ export const criarProduto = (req, res) => {
     const { nomeProduto, valorProduto, categoriaId, imagem } = req.body;
     const resultado = db
       .prepare(
-        "INSERT INTO Produtos (NomeProduto, ValorProduto, CategoriaProduto, ImagemProduto) VALUES (?, ?, ?, ?)",
+        "INSERT INTO Produtos (NomeProduto, ValorProduto, CategoriaProduto, ImagemProdutos) VALUES (?, ?, ?, ?)",
       )
       .run(nomeProduto, valorProduto, categoriaId, imagem);
     res.status(201).json({
@@ -68,7 +66,7 @@ export const editarProduto = (req, res) => {
     const { nomeProduto, valorProduto, categoriaId, imagem } = req.body;
     const resultado = db
       .prepare(
-        "UPDATE Produtos SET NomeProduto = ?, ValorProduto = ?, CategoriaProduto = ?, ImagemProduto = ? WHERE idProduto = ?",
+        "UPDATE Produtos SET NomeProduto = ?, ValorProduto = ?, CategoriaProduto = ?, ImagemProdutos = ? WHERE idProduto = ?",
       )
       .run(nomeProduto, valorProduto, categoriaId, imagem, id);
     if (resultado.changes === 0)

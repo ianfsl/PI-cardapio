@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import API_URL from "../../config/api";
 import {
   Container,
@@ -27,31 +26,52 @@ import {
   MensagemEstado,
 } from "./styles";
 
-export default function Pedido() {
-  const { id } = useParams();
+export default function PedidoConcluido() {
+  const location = useLocation();
   const navigate = useNavigate();
+  const state = location.state;
+
   const [pedido, setPedido] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
+    if (!state?.idPedido) {
+      navigate("/");
+      return;
+    }
+
     const buscarPedido = async () => {
       try {
-        const { data } = await axios.get(`${API_URL}/pedidos/${id}`);
+        const response = await fetch(`${API_URL}/pedidos/${state.idPedido}`);
+        if (!response.ok) throw new Error("não encontrado");
+        const data = await response.json();
         setPedido(data);
-      } catch (err) {
-        console.error("Erro ao buscar pedido:", err);
-        if (err.response?.status === 404) {
-          setErro("Pedido não encontrado.");
+      } catch {
+        if (state.nomeCliente) {
+          setPedido({
+            idPedido: state.idPedido,
+            NomeCliente: state.nomeCliente,
+            NomeProdutoPedido: state.itens
+              ? state.itens.map((i) => `${i.quantidade}x ${i.nomeProduto}`).join(", ")
+              : "—",
+            ValorFinalPedido: state.valorTotal,
+            Observacoes: state.observacoes || null,
+            DataPedido: new Date().toISOString(),
+            MetodoPagamento: state.metodo,
+            StatusPagamento:
+              state.aprovado !== false ? "approved" : "rejected",
+          });
         } else {
-          setErro("Erro ao carregar o pedido. Tente novamente.");
+          setErro("Pedido não encontrado.");
         }
       } finally {
         setCarregando(false);
       }
     };
+
     buscarPedido();
-  }, [id]);
+  }, [state, navigate]);
 
   if (carregando) {
     return (
@@ -72,48 +92,89 @@ export default function Pedido() {
     );
   }
 
+  const statusPagamento = pedido.StatusPagamento;
+  const recusado =
+    statusPagamento === "rejected" ||
+    statusPagamento === "erro" ||
+    state?.aprovado === false;
+  const emAnalise =
+    !recusado &&
+    (statusPagamento === "in_process" || statusPagamento === "pendente");
+  const aprovado = !recusado;
+
   const formatarHorario = (dataString) => {
+    if (!dataString) return "";
     const data = new Date(dataString);
     const horas = String(data.getHours()).padStart(2, "0");
     const minutos = String(data.getMinutes()).padStart(2, "0");
     return `às ${horas}h${minutos}`;
   };
 
-  const itensLista = pedido.NomeProdutoPedido.split(" | ").map((item) =>
-    item.trim(),
-  );
+  const itensLista = pedido.NomeProdutoPedido
+    ? pedido.NomeProdutoPedido
+        .split(/,\s*|\s*\|\s*/)
+        .map((i) => i.trim())
+        .filter(Boolean)
+    : [];
+
+  let icone = "✅";
+  let titulo = "Pedido Recebido!";
+
+  if (recusado) {
+    icone = "❌";
+    titulo = "Pagamento Recusado";
+  } else if (emAnalise) {
+    icone = "🕐";
+    titulo = "Pagamento em Análise";
+  }
 
   return (
     <Container>
       <Cabecalho>
-        <NumeroPedido>Pedido nº{pedido.idPedido}</NumeroPedido>
+        <NumeroPedido>
+          {icone} Pedido #{pedido.idPedido}
+        </NumeroPedido>
         <NomeCliente>{pedido.NomeCliente}</NomeCliente>
         <HorarioPedido>
-          Recebido {formatarHorario(pedido.DataPedido)}
+          {titulo} — Recebido {formatarHorario(pedido.DataPedido)}
         </HorarioPedido>
+        {recusado && (
+          <p style={{ color: "#c1440e", fontSize: "0.9rem", marginTop: "0.5rem" }}>
+            Não foi possível processar seu pagamento. Verifique os dados e tente
+            novamente.
+          </p>
+        )}
       </Cabecalho>
 
-      <EstimativaBox>
-        <EstimativaTitulo>Tempo estimado</EstimativaTitulo>
-        <EstimativaTempo>25 a 35 minutos</EstimativaTempo>
-      </EstimativaBox>
+      {aprovado && (
+        <EstimativaBox>
+          <EstimativaTitulo>Tempo estimado</EstimativaTitulo>
+          <EstimativaTempo>
+            {emAnalise
+              ? "Aguardando confirmação do pagamento"
+              : "25 a 35 minutos"}
+          </EstimativaTempo>
+        </EstimativaBox>
+      )}
 
-      <ProgressoContainer>
-        <Etapa>
-          <Bolinha $ativa>1</Bolinha>
-          <EtapaTexto $ativa>Recebido</EtapaTexto>
-        </Etapa>
-        <Linha />
-        <Etapa>
-          <Bolinha>2</Bolinha>
-          <EtapaTexto>Em preparo</EtapaTexto>
-        </Etapa>
-        <Linha />
-        <Etapa>
-          <Bolinha>3</Bolinha>
-          <EtapaTexto>Pronto</EtapaTexto>
-        </Etapa>
-      </ProgressoContainer>
+      {aprovado && (
+        <ProgressoContainer>
+          <Etapa>
+            <Bolinha $ativa>1</Bolinha>
+            <EtapaTexto $ativa>Recebido</EtapaTexto>
+          </Etapa>
+          <Linha />
+          <Etapa>
+            <Bolinha>2</Bolinha>
+            <EtapaTexto>Em preparo</EtapaTexto>
+          </Etapa>
+          <Linha />
+          <Etapa>
+            <Bolinha>3</Bolinha>
+            <EtapaTexto>Pronto</EtapaTexto>
+          </Etapa>
+        </ProgressoContainer>
+      )}
 
       <ItensBox>
         <ItensTitulo>Seu pedido</ItensTitulo>
@@ -122,7 +183,12 @@ export default function Pedido() {
         ))}
         <ValorTotal>
           <span>Total</span>
-          <span>R$ {pedido.ValorFinalPedido.toFixed(2)}</span>
+          <span>
+            R${" "}
+            {pedido.ValorFinalPedido != null
+              ? Number(pedido.ValorFinalPedido).toFixed(2)
+              : "—"}
+          </span>
         </ValorTotal>
       </ItensBox>
 
@@ -133,7 +199,9 @@ export default function Pedido() {
         </ObservacoesBox>
       )}
 
-      <VoltarBtn onClick={() => navigate("/")}>Voltar ao cardápio</VoltarBtn>
+      <VoltarBtn onClick={() => navigate("/")}>
+        {recusado ? "Tentar novamente" : "Voltar ao cardápio"}
+      </VoltarBtn>
     </Container>
   );
 }

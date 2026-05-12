@@ -2,30 +2,23 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import API_URL from "../../config/api";
 import { useCarrinho } from "../../context/CarrinhoContext";
-import ModalAdicionais from "./ModalAdicionais";
 import {
   Container,
   Banner,
   Conteudo,
   CategoriaSection,
   CategoriaTitulo,
-  ProdutosGrid,
   ProdutoCard,
   ProdutoInfo,
   ProdutoImagem,
   AdicionarBtn,
 } from "./styles";
-import bannerBigGula from "../../assets/banner.jpg";
-
-const CATEGORIAS_LANCHE = ["BIG", "Baby"];
 
 export default function Cardapio() {
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [adicionais, setAdicionais] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
-  const [produtoNoModal, setProdutoNoModal] = useState(null);
   const { adicionarItem } = useCarrinho();
 
   useEffect(() => {
@@ -38,7 +31,7 @@ export default function Cardapio() {
           axios.get(`${API_URL}/adicionais`),
         ]);
 
-        const adicionaisComoProdutos = resAdicionais.data.map((a) => ({
+        const adicionaisFormatados = resAdicionais.data.map((a) => ({
           idProduto: `adicional-${a.idAdicional}`,
           NomeProduto: a.NomeProdutoAdicional,
           ValorProduto: a.ValorExtra,
@@ -46,15 +39,8 @@ export default function Cardapio() {
           idCategoria: a.idCategoria,
         }));
 
-        const adicionaisParaModal = resAdicionais.data.map((a) => ({
-          idAdicional: a.idAdicional,
-          nomeAdicional: a.NomeProdutoAdicional,
-          valorExtra: parseFloat(a.ValorExtra),
-        }));
-
-        setProdutos([...resProdutos.data, ...adicionaisComoProdutos]);
+        setProdutos([...resProdutos.data, ...adicionaisFormatados]);
         setCategorias(resCategorias.data);
-        setAdicionais(adicionaisParaModal);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
         setErro("Erro ao carregar o cardápio. Tente novamente.");
@@ -65,26 +51,6 @@ export default function Cardapio() {
 
     fetchDados();
   }, []);
-
-  const handleAdicionar = (produto, nomeCategoria) => {
-    const dadosProduto = {
-      idProduto: produto.idProduto,
-      nomeProduto: produto.NomeProduto,
-      valorProduto: parseFloat(produto.ValorProduto),
-      categoria: nomeCategoria,
-    };
-
-    if (CATEGORIAS_LANCHE.includes(nomeCategoria)) {
-      setProdutoNoModal(dadosProduto);
-    } else {
-      adicionarItem(dadosProduto);
-    }
-  };
-
-  const handleConfirmarModal = (adicionaisSelecionados) => {
-    adicionarItem(produtoNoModal, adicionaisSelecionados);
-    setProdutoNoModal(null);
-  };
 
   if (carregando) {
     return (
@@ -105,7 +71,10 @@ export default function Cardapio() {
   return (
     <Container>
       <Banner>
-        <img src={bannerBigGula} alt="Big Gula" />
+        <img
+          src="https://images.unsplash.com/photo-1550317138-10000687a72b?w=2000"
+          alt="Big Gula"
+        />
       </Banner>
 
       <Conteudo>
@@ -119,45 +88,39 @@ export default function Cardapio() {
           return (
             <CategoriaSection key={categoria.idCategoria}>
               <CategoriaTitulo>{categoria.NomeCategoria}</CategoriaTitulo>
-              <ProdutosGrid>
-                {produtosDaCategoria.map((produto) => (
-                  <ProdutoCard key={produto.idProduto}>
-                    <ProdutoInfo>
-                      <h3>{produto.NomeProduto}</h3>
-                      <span>
-                        R$ {parseFloat(produto.ValorProduto).toFixed(2)}
-                      </span>
-                      <br />
-                      <AdicionarBtn
-                        onClick={() =>
-                          handleAdicionar(produto, categoria.NomeCategoria)
-                        }
-                      >
-                        + Adicionar
-                      </AdicionarBtn>
-                    </ProdutoInfo>
-                    {produto.ImagemProdutos && (
-                      <ProdutoImagem
-                        src={`/produtos/${produto.ImagemProdutos}`}
-                        alt={produto.NomeProduto}
-                      />
-                    )}
-                  </ProdutoCard>
-                ))}
-              </ProdutosGrid>
+              {produtosDaCategoria.map((produto) => (
+                <ProdutoCard key={produto.idProduto}>
+                  <ProdutoInfo>
+                    <h3>{produto.NomeProduto}</h3>
+                    <span>
+                      R$ {parseFloat(produto.ValorProduto).toFixed(2)}
+                    </span>
+                    <br />
+                    <AdicionarBtn
+                      onClick={() =>
+                        adicionarItem({
+                          idProduto: produto.idProduto,
+                          nomeProduto: produto.NomeProduto,
+                          valorProduto: parseFloat(produto.ValorProduto),
+                          categoria: categoria.NomeCategoria,
+                        })
+                      }
+                    >
+                      + Adicionar
+                    </AdicionarBtn>
+                  </ProdutoInfo>
+                  {produto.ImagemProdutos && (
+                    <ProdutoImagem
+                      src={produto.ImagemProdutos}
+                      alt={produto.NomeProduto}
+                    />
+                  )}
+                </ProdutoCard>
+              ))}
             </CategoriaSection>
           );
         })}
       </Conteudo>
-
-      {produtoNoModal && (
-        <ModalAdicionais
-          produto={produtoNoModal}
-          adicionaisDisponiveis={adicionais}
-          onCancelar={() => setProdutoNoModal(null)}
-          onConfirmar={handleConfirmarModal}
-        />
-      )}
     </Container>
   );
 }
