@@ -35,7 +35,7 @@ export default function LoginAdmin() {
       });
 
       localStorage.setItem("adminToken", response.data.token);
-      navigate("/admin/painel");
+      navigate("/admin/pedidos");
     } catch (error) {
       setErro("E-mail ou senha inválidos.");
     } finally {
