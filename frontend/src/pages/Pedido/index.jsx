@@ -59,8 +59,7 @@ export default function PedidoConcluido() {
             Observacoes: state.observacoes || null,
             DataPedido: new Date().toISOString(),
             MetodoPagamento: state.metodo,
-            StatusPagamento:
-              state.aprovado !== false ? "approved" : "rejected",
+            StatusPagamento: state.aprovado !== false ? "approved" : "rejected",
           });
         } else {
           setErro("Pedido não encontrado.");
@@ -127,6 +126,10 @@ export default function PedidoConcluido() {
     icone = "🕐";
     titulo = "Pagamento em Análise";
   }
+
+  const handleBaixarComprovante = () => {
+    window.open(`${API_URL}/pagamentos/comprovante/${pedido.idPedido}`, "_blank");
+  };
 
   return (
     <Container>
@@ -197,6 +200,26 @@ export default function PedidoConcluido() {
           <ObservacoesTitulo>Observações</ObservacoesTitulo>
           <ObservacoesTexto>{pedido.Observacoes}</ObservacoesTexto>
         </ObservacoesBox>
+      )}
+
+      {aprovado && !emAnalise && (
+        <button
+          onClick={handleBaixarComprovante}
+          style={{
+            width: "100%",
+            backgroundColor: "#e85d04",
+            color: "#fff",
+            border: "none",
+            padding: "0.85rem",
+            borderRadius: "4px",
+            fontSize: "0.95rem",
+            fontWeight: "600",
+            cursor: "pointer",
+            marginBottom: "0.75rem",
+          }}
+        >
+          📄 Baixar Comprovante (PDF)
+        </button>
       )}
 
       <VoltarBtn onClick={() => navigate("/")}>
