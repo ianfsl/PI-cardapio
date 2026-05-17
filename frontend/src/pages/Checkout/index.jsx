@@ -23,6 +23,8 @@ import {
   CopiarBtn,
 } from "./styles";
 
+const METODOS_CARTAO = ["credito", "debito"];
+
 export default function Checkout() {
   const { itens, total, limparCarrinho } = useCarrinho();
   const navigate = useNavigate();
@@ -41,6 +43,7 @@ export default function Checkout() {
   const [mpReady, setMpReady] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const [dadosPixPedido, setDadosPixPedido] = useState(null);
+
   const cardFormRef = useRef(null);
 
   useEffect(() => {
@@ -51,7 +54,7 @@ export default function Checkout() {
   }, [itens, navigate, pixQrBase64]);
 
   useEffect(() => {
-    if (metodo !== "cartao") return;
+    if (!METODOS_CARTAO.includes(metodo)) return;
     if (!window.MercadoPago) {
       setErro("SDK do MercadoPago não carregou. Recarregue a página.");
       return;
@@ -65,15 +68,15 @@ export default function Checkout() {
       iframe: false,
       form: {
         id: "form-cartao",
-        cardNumber: { id: "mp-cardNumber", placeholder: "Número do Cartão" },
-        expirationDate: { id: "mp-expirationDate", placeholder: "MM/AA" },
-        securityCode: { id: "mp-securityCode", placeholder: "CVC" },
-        cardholderName: { id: "mp-cardholderName", placeholder: "Como está no cartão" },
-        issuer: { id: "mp-issuer" },
-        installments: { id: "mp-installments" },
-        identificationType: { id: "mp-identificationType" },
-        identificationNumber: { id: "mp-identificationNumber" },
-        cardholderEmail: { id: "mp-email" },
+        cardNumber:          { id: "mp-cardNumber",          placeholder: "Número do Cartão" },
+        expirationDate:      { id: "mp-expirationDate",      placeholder: "MM/AA" },
+        securityCode:        { id: "mp-securityCode",        placeholder: "CVC" },
+        cardholderName:      { id: "mp-cardholderName",      placeholder: "Como está no cartão" },
+        issuer:              { id: "mp-issuer" },
+        installments:        { id: "mp-installments" },
+        identificationType:  { id: "mp-identificationType" },
+        identificationNumber:{ id: "mp-identificationNumber" },
+        cardholderEmail:     { id: "mp-email" },
       },
       callbacks: {
         onFormMounted: (error) => {
@@ -103,41 +106,45 @@ export default function Checkout() {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                metodo: "cartao",
-                nomeCliente: formData.cardholderName || nome,
-                email: formData.payer?.email || email,
-                cpf: formData.payer?.identification?.number || cpf.replace(/\D/g, ""),
+                metodo,
+                nomeCliente:      formData.cardholderName || nome,
+                email:            formData.payer?.email || email,
+                cpf:              formData.payer?.identification?.number || cpf.replace(/\D/g, ""),
                 telefone,
-                observacoes: observacao,
+                observacoes:      observacao,
                 itens,
-                valorTotal: Number(total),
-                token: formData.token,
-                installments: Number(formData.installments) || 1,
+                valorTotal:       Number(total),
+                token:            formData.token,
+                installments:     metodo === "debito" ? 1 : Number(formData.installments) || 1,
                 payment_method_id: formData.paymentMethodId,
-                issuer_id: formData.issuerId,
+                issuer_id:        formData.issuerId,
               }),
             });
 
             const result = await response.json();
 
             if (response.ok && result.sucesso) {
-              const aprovado = result.status === "approved" || result.status === "in_process";
+              const aprovado =
+                result.status === "approved" || result.status === "in_process";
               limparCarrinho();
               navigate("/pedido-concluido", {
                 state: {
-                  idPedido: result.idPedido,
-                  nomeCliente: result.nomeCliente,
-                  valorTotal: result.valorTotal,
-                  metodo: "cartao",
-                  status: result.status,
+                  idPedido:     result.idPedido,
+                  nomeCliente:  result.nomeCliente,
+                  valorTotal:   result.valorTotal,
+                  metodo,
+                  status:       result.status,
                   status_detail: result.status_detail,
                   aprovado,
                   itens,
-                  observacoes: observacao,
+                  observacoes:  observacao,
                 },
               });
             } else {
-              const mensagem = traduzirErroMP(result.status_detail) || result.error || "Falha no pagamento. Verifique os dados.";
+              const mensagem =
+                traduzirErroMP(result.status_detail) ||
+                result.error ||
+                "Falha no pagamento. Verifique os dados.";
               setErro(mensagem);
             }
           } catch (err) {
@@ -164,27 +171,25 @@ export default function Checkout() {
 
   const traduzirErroMP = (detail) => {
     const map = {
-      cc_rejected_insufficient_amount: "Saldo insuficiente no cartão.",
+      cc_rejected_insufficient_amount:      "Saldo insuficiente no cartão.",
       cc_rejected_bad_filled_security_code: "CVV incorreto.",
-      cc_rejected_bad_filled_date: "Data de validade incorreta.",
-      cc_rejected_bad_filled_card_number: "Número de cartão incorreto.",
-      cc_rejected_call_for_authorize: "Pagamento não autorizado. Entre em contato com seu banco.",
-      cc_rejected_card_disabled: "Cartão desabilitado. Entre em contato com seu banco.",
-      cc_rejected_duplicated_payment: "Pagamento duplicado detectado.",
-      cc_rejected_high_risk: "Pagamento recusado por segurança.",
-      pending_contingency: "Pagamento em processamento. Aguarde.",
-      pending_review_manual: "Pagamento em análise manual.",
+      cc_rejected_bad_filled_date:          "Data de validade incorreta.",
+      cc_rejected_bad_filled_card_number:   "Número de cartão incorreto.",
+      cc_rejected_call_for_authorize:       "Pagamento não autorizado. Entre em contato com seu banco.",
+      cc_rejected_card_disabled:            "Cartão desabilitado. Entre em contato com seu banco.",
+      cc_rejected_duplicated_payment:       "Pagamento duplicado detectado.",
+      cc_rejected_high_risk:                "Pagamento recusado por segurança.",
+      pending_contingency:                  "Pagamento em processamento. Aguarde.",
+      pending_review_manual:                "Pagamento em análise manual.",
     };
     return map[detail] || null;
   };
 
-  // ── PIX ──────────────────────────────────────────────────────────────────
   const handleSubmitPix = async () => {
     if (!nome.trim() || !email.trim() || !cpf.trim()) {
       setErro("Preencha nome, e-mail e CPF para gerar o PIX.");
       return;
     }
-
     setEnviando(true);
     setErro("");
 
@@ -210,9 +215,9 @@ export default function Checkout() {
         setPixQrBase64(data.qr_code_base64);
         setPixCopiaCola(data.qr_code);
         setDadosPixPedido({
-          idPedido: data.idPedido,
+          idPedido:    data.idPedido,
           nomeCliente: data.nomeCliente,
-          valorTotal: data.valorTotal,
+          valorTotal:  data.valorTotal,
         });
         limparCarrinho();
       } else {
@@ -241,10 +246,7 @@ export default function Checkout() {
         <CheckoutBox style={{ textAlign: "center" }}>
           <Titulo>Pagamento via PIX</Titulo>
           <PixBox>
-            <QrImg
-              src={`data:image/png;base64,${pixQrBase64}`}
-              alt="QR Code PIX"
-            />
+            <QrImg src={`data:image/png;base64,${pixQrBase64}`} alt="QR Code PIX" />
             <p>Escaneie o QR Code acima ou use o código abaixo:</p>
             <PixCopiaECola>{pixCopiaCola}</PixCopiaECola>
             <CopiarBtn onClick={handleCopiarPix}>
@@ -258,11 +260,11 @@ export default function Checkout() {
             onClick={() =>
               navigate("/pedido-concluido", {
                 state: {
-                  idPedido: dadosPixPedido?.idPedido,
+                  idPedido:    dadosPixPedido?.idPedido,
                   nomeCliente: dadosPixPedido?.nomeCliente,
-                  valorTotal: dadosPixPedido?.valorTotal,
-                  metodo: "pix",
-                  aprovado: true,
+                  valorTotal:  dadosPixPedido?.valorTotal,
+                  metodo:      "pix",
+                  aprovado:    true,
                   observacoes: observacao,
                 },
               })
@@ -281,6 +283,8 @@ export default function Checkout() {
       </Container>
     );
   }
+
+  const isCartao = METODOS_CARTAO.includes(metodo);
 
   return (
     <Container>
@@ -345,12 +349,15 @@ export default function Checkout() {
             <MetodoBtn $ativo={metodo === "pix"} onClick={() => setMetodo("pix")}>
               PIX
             </MetodoBtn>
-            <MetodoBtn $ativo={metodo === "cartao"} onClick={() => setMetodo("cartao")}>
-              Cartão de Crédito
+            <MetodoBtn $ativo={metodo === "credito"} onClick={() => setMetodo("credito")}>
+              Crédito
+            </MetodoBtn>
+            <MetodoBtn $ativo={metodo === "debito"} onClick={() => setMetodo("debito")}>
+              Débito
             </MetodoBtn>
           </MetodosPagamento>
 
-          {metodo === "cartao" && (
+          {isCartao && (
             <Form id="form-cartao">
               <Label>
                 Número do Cartão
@@ -358,37 +365,41 @@ export default function Checkout() {
               </Label>
               <div style={{ display: "flex", gap: "1rem" }}>
                 <Label style={{ flex: 1 }}>
-                  Validade <Input id="mp-expirationDate" placeholder="MM/AA" />
+                  Validade
+                  <Input id="mp-expirationDate" placeholder="MM/AA" />
                 </Label>
                 <Label style={{ flex: 1 }}>
-                  CVV <Input id="mp-securityCode" placeholder="CVC" />
+                  CVV
+                  <Input id="mp-securityCode" placeholder="CVC" />
                 </Label>
               </div>
               <Label>
                 Nome Impresso no Cartão
-                <Input
-                  type="text"
-                  id="mp-cardholderName"
-                  placeholder="Como está no cartão"
-                />
+                <Input id="mp-cardholderName" placeholder="Como está no cartão" />
               </Label>
-              <Label>
-                Parcelamento
-                <select
-                  id="mp-installments"
-                  style={{
-                    width: "100%",
-                    padding: "0.6rem",
-                    borderRadius: "6px",
-                    border: "1px solid #ccc",
-                    fontSize: "1rem",
-                  }}
-                />
-              </Label>
-              <select id="mp-issuer" style={{ display: "none" }} />
-              <select id="mp-identificationType" style={{ display: "none" }} />
-              <input id="mp-identificationNumber" style={{ display: "none" }} />
-              <input id="mp-email" style={{ display: "none" }} />
+
+              {metodo === "credito" ? (
+                <Label>
+                  Parcelamento
+                  <select
+                    id="mp-installments"
+                    style={{
+                      width: "100%",
+                      padding: "0.6rem",
+                      borderRadius: "6px",
+                      border: "1px solid #ccc",
+                      fontSize: "1rem",
+                    }}
+                  />
+                </Label>
+              ) : (
+                <select id="mp-installments" style={{ display: "none" }} />
+              )}
+
+              <select id="mp-issuer"               style={{ display: "none" }} />
+              <select id="mp-identificationType"   style={{ display: "none" }} />
+              <input  id="mp-identificationNumber" style={{ display: "none" }} readOnly />
+              <input  id="mp-email"                style={{ display: "none" }} readOnly />
             </Form>
           )}
         </Secao>
@@ -396,10 +407,8 @@ export default function Checkout() {
         <ResumoContainer>
           <h3>Itens no Pedido</h3>
           {itens.map((item) => (
-            <ResumoItem key={item.idProduto}>
-              <span>
-                {item.quantidade}x {item.nomeProduto}
-              </span>
+            <ResumoItem key={item.idItem}>
+              <span>{item.quantidade}x {item.nomeProduto}</span>
               <span>R$ {(item.valorProduto * item.quantidade).toFixed(2)}</span>
             </ResumoItem>
           ))}
@@ -412,11 +421,7 @@ export default function Checkout() {
         {erro && <ErrorMsg>{erro}</ErrorMsg>}
 
         {metodo === "pix" ? (
-          <FinalizarBtn
-            type="button"
-            disabled={enviando}
-            onClick={handleSubmitPix}
-          >
+          <FinalizarBtn type="button" disabled={enviando} onClick={handleSubmitPix}>
             {enviando ? "Processando..." : "Gerar QR Code PIX"}
           </FinalizarBtn>
         ) : (
@@ -429,7 +434,9 @@ export default function Checkout() {
               ? "Carregando formulário..."
               : enviando
               ? "Processando..."
-              : "Confirmar Pagamento"}
+              : metodo === "debito"
+              ? "Pagar no Débito"
+              : "Pagar no Crédito"}
           </FinalizarBtn>
         )}
       </CheckoutBox>
