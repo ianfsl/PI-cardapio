@@ -52,9 +52,21 @@ export default function Cardapio() {
           valorExtra: parseFloat(a.ValorExtra),
         }));
 
-        setProdutos([...resProdutos.data, ...adicionaisComoProdutos]);
+        const produtosCarregados = [
+          ...resProdutos.data,
+          ...adicionaisComoProdutos,
+        ];
+        setProdutos(produtosCarregados);
         setCategorias(resCategorias.data);
         setAdicionais(adicionaisParaModal);
+
+        produtosCarregados
+          .map((produto) => produto.ImagemProdutos)
+          .filter(Boolean)
+          .forEach((imagem) => {
+            const img = new Image();
+            img.src = `/produtos/${imagem}`;
+          });
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
         setErro("Erro ao carregar o cardápio. Tente novamente.");
@@ -105,7 +117,12 @@ export default function Cardapio() {
   return (
     <Container>
       <Banner>
-        <img src={bannerBigGula} alt="Big Gula" />
+        <img
+          src={bannerBigGula}
+          alt="Big Gula"
+          fetchPriority="high"
+          decoding="async"
+        />
       </Banner>
 
       <Conteudo>
@@ -140,6 +157,9 @@ export default function Cardapio() {
                       <ProdutoImagem
                         src={`/produtos/${produto.ImagemProdutos}`}
                         alt={produto.NomeProduto}
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="high"
                       />
                     )}
                   </ProdutoCard>

@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import GlobalStyles from "./styles/GlobalStyles";
 import Header from "./components/Header";
+import AvisoRetirada from "./components/AvisoRetirada";
 import Footer from "./components/Footer";
 import { CarrinhoProvider } from "./context/CarrinhoContext";
 import Cardapio from "./pages/Cardapio";
@@ -18,6 +19,7 @@ export default function App() {
     <CarrinhoProvider>
       <GlobalStyles />
       <Header />
+      <AvisoRetirada />
       <Routes>
         <Route path="/" element={<Cardapio />} />
         <Route path="/carrinho" element={<Carrinho />} />
