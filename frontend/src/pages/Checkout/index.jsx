@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCarrinho } from "../../context/CarrinhoContext";
+import axios from "axios";
+import API_URL from "../../config/api";
 import {
   Container,
   Titulo,
@@ -102,7 +104,7 @@ export default function Checkout() {
           }
 
           try {
-            const response = await fetch("/api/pagamentos", {
+            const response = await fetch(`${API_URL}/pagamentos`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -194,7 +196,7 @@ export default function Checkout() {
     setErro("");
 
     try {
-      const response = await fetch("/api/pagamentos", {
+      const response = await fetch(`${API_URL}/pagamentos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
